@@ -11,7 +11,8 @@ use clap::{Arg, App};
 fn main() {
     let matches = App::new("geoshaper")
     					.version("0.1.0")
-    					.author("Pedro Scaff <email>")
+    					.author("Pedro Scaff <pedro@scaff.me>")
+    					.author("Robert Günzler <r@gnzler.io>")
     					.arg(Arg::with_name("image")
     						.short("i")
     						.long("image")

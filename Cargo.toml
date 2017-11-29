@@ -1,5 +1,5 @@
 [package]
-authors = ["Pedro Scaff <pedro@scaff.me>"]
+authors = ["Pedro Scaff <pedro@scaff.me>", "Robert Günzler <r@gnzler.io>"]
 name = "geoshaper"
 version = "0.1.0"
 
