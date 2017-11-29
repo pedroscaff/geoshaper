@@ -1,0 +1,6 @@
+[package]
+name = "geoshaper"
+version = "0.1.0"
+authors = ["Pedro Scaff <pedro@scaff.me>"]
+
+[dependencies]
