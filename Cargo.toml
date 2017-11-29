@@ -1,7 +1,8 @@
 [package]
+authors = ["Pedro Scaff <pedro@scaff.me>"]
 name = "geoshaper"
 version = "0.1.0"
-authors = ["Pedro Scaff <pedro@scaff.me>"]
 
 [dependencies]
 clap = "2.28.0"
+image = "0.17.0"

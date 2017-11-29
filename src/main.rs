@@ -1,5 +1,11 @@
 extern crate clap;
+extern crate image as image_rs;
 
+mod image;
+
+use std::path::Path;
+use std::process;
+use image_rs::GenericImage;
 use clap::{Arg, App};
 
 fn main() {
@@ -14,6 +20,16 @@ fn main() {
     						.takes_value(true)
     						.required(true))
     					.get_matches();
-    let img = matches.value_of("image").unwrap();
-    println!("Target image -> {}", img);
+
+    let img_path = matches.value_of("image")
+        .map(|istr| Path::new(istr))
+        .unwrap();
+
+    let img = image::load_image(img_path)
+        .unwrap_or_else(|e| {
+            eprintln!("opening image failed: {}", e);
+            process::exit(1);
+        });
+
+    println!("Target image -> {:?}", img.dimensions());
 }
