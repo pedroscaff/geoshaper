@@ -1,5 +1,7 @@
 extern crate clap;
 extern crate image as image_rs;
+extern crate darwin_rs;
+extern crate svg;
 
 mod image;
 
@@ -7,6 +9,9 @@ use std::path::Path;
 use std::process;
 use image_rs::GenericImage;
 use clap::{Arg, App};
+
+use darwin_rs::Individual;
+use image::GImage;
 
 fn main() {
     let matches = App::new("geoshaper")
@@ -32,5 +37,8 @@ fn main() {
             process::exit(1);
         });
 
-    println!("Target image -> {:?}", img.dimensions());
+    let mut gimg = GImage::new(img);
+
+    println!("target image -> {:?}", gimg.target.dimensions());
+    println!("fitness -> {:?}", gimg.calculate_fitness());
 }

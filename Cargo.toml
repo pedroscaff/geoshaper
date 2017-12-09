@@ -1,8 +1,13 @@
 [package]
-authors = ["Pedro Scaff <pedro@scaff.me>", "Robert Günzler <r@gnzler.io>"]
+authors = [
+    "Pedro Scaff <pedro@scaff.me>",
+    "Robert Günzler <r@gnzler.io>",
+]
 name = "geoshaper"
 version = "0.1.0"
 
 [dependencies]
 clap = "2.28.0"
+darwin-rs = "0.4.0"
 image = "0.17.0"
+svg = "0.5.7"
