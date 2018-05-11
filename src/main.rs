@@ -1,7 +1,8 @@
 extern crate clap;
 extern crate image as image_rs;
 extern crate darwin_rs;
-extern crate svgdom;
+extern crate rand;
+extern crate nsvg;
 
 mod image;
 mod simulation;

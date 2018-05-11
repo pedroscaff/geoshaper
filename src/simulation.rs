@@ -1,4 +1,4 @@
-use darwin_rs::{Individual, SimulationBuilder, Population, PopulationBuilder};
+use darwin_rs::{SimulationBuilder, Population, PopulationBuilder};
 use image_rs::DynamicImage;
 use image::GImage;
 use std::io::Error;
@@ -12,14 +12,14 @@ pub struct Options {
 fn make_population(size: u32, target: Arc<DynamicImage>) -> Vec<GImage> {
     let mut pop_array: Vec<GImage> = Vec::with_capacity(size as usize);
     for i in 0..size {
-        pop_array.push(GImage::new(target.clone()));
+        pop_array.push(GImage::new(i, target.clone()));
     }
     pop_array
 }
 
 pub fn run(target: Arc<DynamicImage>, options: Options) {
     let my_pop = make_population(options.pop_size, target);
-    println!("{:?}", my_pop);
+
     let population1 = PopulationBuilder::<GImage>::new()
         .set_id(1)
         .initial_population(&my_pop)
