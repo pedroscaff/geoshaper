@@ -1,8 +1,9 @@
-use darwin_rs::{SimulationBuilder, Population, PopulationBuilder};
-use image_rs::DynamicImage;
-use image::GImage;
-use std::io::Error;
+use darwin_rs::{SimulationBuilder, PopulationBuilder};
+use image::DynamicImage;
+use individual::GImage;
+// use std::io::Error;
 use std::sync::Arc;
+use image_utils::get_average_color;
 
 #[derive(Debug)]
 pub struct Options {
@@ -11,8 +12,9 @@ pub struct Options {
 
 fn make_population(size: u32, target: Arc<DynamicImage>) -> Vec<GImage> {
     let mut pop_array: Vec<GImage> = Vec::with_capacity(size as usize);
+    let avg_color = get_average_color(target.clone());
     for i in 0..size {
-        pop_array.push(GImage::new(i, target.clone()));
+        pop_array.push(GImage::new(i, target.clone(), avg_color));
     }
     pop_array
 }
@@ -52,6 +54,8 @@ pub fn run(target: Arc<DynamicImage>, options: Options) {
         Err(_) => println!("more than 10 iteratons needed"),
         Ok(mut my_simulation) => {
             my_simulation.run();
+
+            my_simulation.simulation_result.fittest[0].individual.save("fit.png").unwrap();
 
             println!("total run time: {} ms", my_simulation.total_time_in_ms);
             println!(

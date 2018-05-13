@@ -9,6 +9,6 @@ version = "0.1.0"
 [dependencies]
 clap = "2.28.0"
 darwin-rs = "0.4.0"
-image = "0.17.0"
+image = "0.18.0"
 rand = "0.4.2"
 nsvg = "0.4.0"

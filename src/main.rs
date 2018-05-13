@@ -1,10 +1,11 @@
 extern crate clap;
-extern crate image as image_rs;
+extern crate image;
 extern crate darwin_rs;
 extern crate rand;
 extern crate nsvg;
 
-mod image;
+mod image_utils;
+mod individual;
 mod simulation;
 
 use std::path::Path;
@@ -33,7 +34,7 @@ fn main() {
         .map(|istr| Path::new(istr))
         .unwrap();
 
-    let img = image::load_image(img_path).unwrap_or_else(|e| {
+    let img = image_utils::load_image(img_path).unwrap_or_else(|e| {
         eprintln!("opening image failed: {}", e);
         process::exit(1);
     });
