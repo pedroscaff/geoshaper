@@ -1,7 +1,8 @@
 use std::path::Path;
 use std::fmt;
 use std::sync::Arc;
-use image::{DynamicImage, GenericImage, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImage, Rgba, RgbaImage, ColorType};
+use image::save_buffer;
 use darwin_rs::Individual;
 use rand::thread_rng;
 use rand::distributions::{IndependentSample, Range};
@@ -47,7 +48,8 @@ pub struct GImage {
     id: u32,
     width: u32,
     height: u32,
-    avg_color: Rgba<u8>
+    avg_color: Rgba<u8>,
+    path: String
 }
 
 impl GImage {
@@ -60,7 +62,8 @@ impl GImage {
             width: width,
             height: height,
             id: id,
-            avg_color: avg_color
+            avg_color: avg_color,
+            path: format!("tmp/{}", id)
         }
     }
 
@@ -100,12 +103,27 @@ impl GImage {
         svg
     }
 
-    pub fn save(&self, path: &str) -> Result<()> {
-        let mut file = File::create(path)?;
+    fn save_svg(&self) -> Result<()> {
+        let mut file = File::create(&self.path)?;
         let content = self.svg_as_string();
         file.write_all(content.as_bytes())?;
         Ok(())
     }
+
+    fn raster(&self) -> RgbaImage {
+        let path = Path::new(&self.path);
+        let svg = nsvg::parse_file(path, nsvg::Units::Pixel, 96.0).unwrap();
+        let scale = 1.0;
+        svg.rasterize(scale).unwrap()
+    }
+
+    pub fn save_raster(&self, path: &Path) -> Result<()> {
+        save_buffer(
+            path,
+            &self.raster().into_raw(),
+            self.width, self.height, ColorType::RGBA(8))
+    }
+
 }
 
 impl fmt::Debug for GImage {
@@ -121,13 +139,8 @@ impl Individual for GImage {
     }
 
     fn calculate_fitness(&mut self) -> f64 {
-        let path_str = format!("tmp/{}", self.id);
-        self.save(path_str.as_str()).unwrap();
-        let path = Path::new(&path_str);
-        let svg = nsvg::parse_file(path, nsvg::Units::Pixel, 96.0).unwrap();
-        let scale = 1.0;
-        let raster : RgbaImage = svg.rasterize(scale).unwrap();
-        image_diff(self.target.clone(), &raster)
+        self.save_svg().unwrap();
+        image_diff(self.target.clone(), &self.raster())
     }
 
     fn reset(&mut self) {
