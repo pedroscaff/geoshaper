@@ -71,6 +71,5 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         }
     }
 
-    // unimplemented!()
     Ok(())
 }
