@@ -5,6 +5,8 @@ use std::path::Path;
 use std::sync::Arc;
 use image_utils::get_average_color;
 
+use error::{Result, ResultExt};
+
 #[derive(Debug)]
 pub struct Options {
     pub pop_size: u32,
@@ -19,7 +21,7 @@ fn make_population(size: u32, target: Arc<DynamicImage>) -> Vec<GImage> {
     pop_array
 }
 
-pub fn run(target: Arc<DynamicImage>, options: Options) {
+pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
     let my_pop = make_population(options.pop_size, target);
 
     let population1 = PopulationBuilder::<GImage>::new()
@@ -29,8 +31,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) {
         .reset_limit_increment(100)
         .reset_limit_start(100)
         .reset_limit_end(1000)
-        .finalize()
-        .unwrap();
+        .finalize().sync()?;
 
 
     let population2 = PopulationBuilder::<GImage>::new()
@@ -40,8 +41,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) {
         .reset_limit_increment(200)
         .reset_limit_start(100)
         .reset_limit_end(2000)
-        .finalize()
-        .unwrap();
+        .finalize().sync()?;
 
     let my_builder = SimulationBuilder::<GImage>::new()
         .factor(0.34)
@@ -55,7 +55,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) {
         Ok(mut my_simulation) => {
             my_simulation.run();
 
-            my_simulation.simulation_result.fittest[0].individual.save_raster(Path::new("fit.png")).unwrap();
+            my_simulation.simulation_result.fittest[0].individual.save_raster(Path::new("fit.png"))?;
 
             println!("total run time: {} ms", my_simulation.total_time_in_ms);
             println!(
@@ -71,6 +71,5 @@ pub fn run(target: Arc<DynamicImage>, options: Options) {
         }
     }
 
-    // unimplemented!()
-
+    Ok(())
 }
