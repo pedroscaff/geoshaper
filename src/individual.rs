@@ -12,6 +12,7 @@ use image::save_buffer;
 use darwin_rs::Individual;
 
 use image_utils::{image_diff, rgba_to_str};
+use error::Result;
 
 #[derive(Debug, Clone)]
 struct Point {
@@ -121,16 +122,18 @@ impl GImage {
     fn raster(&self) -> Result<RgbaImage> {
         let svg = nsvg::parse_file(&self.path, nsvg::Units::Pixel, 96.0)?;
         let scale = 1.0;
-        svg.rasterize(scale).unwrap()
+        Ok(svg.rasterize(scale)?)
     }
 
     pub fn save_raster(&self, path: &Path) -> Result<()> {
-        save_buffer(
+        Ok(save_buffer(
             path,
-            &self.raster().into_raw(),
-            self.width, self.height, ColorType::RGBA(8))
+            &self.raster()?.into_raw(),
+            self.width,
+            self.height,
+            ColorType::RGBA(8),
+        )?)
     }
-
 }
 
 impl fmt::Debug for GImage {
@@ -146,8 +149,22 @@ impl Individual for GImage {
     }
 
     fn calculate_fitness(&mut self) -> f64 {
-        self.save_svg().unwrap();
-        image_diff(self.target.clone(), &self.raster())
+        match self.save_svg() {
+            Err(e) => {
+                error!("error saving SVG of individual {}: {}", self.id, e);
+                9999.0
+            }
+            Ok(_) => {
+                debug!("wrote SVG for individual {}", self.id);
+                match self.raster() {
+                    Ok(r) => image_diff(self.target.clone(), &r),
+                    Err(e) => {
+                        error!("error rasterizing individual {}: {}", self.id, e);
+                        9999.0
+                    }
+                }
+            }
+        }
     }
 
     fn reset(&mut self) {
