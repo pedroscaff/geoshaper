@@ -1,16 +1,17 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fmt;
 use std::sync::Arc;
-use image::{DynamicImage, GenericImage, Rgba, RgbaImage, ColorType};
-use image::save_buffer;
-use darwin_rs::Individual;
+use std::fs::{create_dir, File};
+use std::io::prelude::*;
 use rand::thread_rng;
 use rand::distributions::{IndependentSample, Range};
-use std::fs::File;
-use std::io::Result;
-use std::io::prelude::*;
+
 use nsvg;
-use image_utils::{rgba_to_str, image_diff};
+use image::{ColorType, DynamicImage, GenericImage, Rgba, RgbaImage};
+use image::save_buffer;
+use darwin_rs::Individual;
+
+use image_utils::{image_diff, rgba_to_str};
 
 #[derive(Debug, Clone)]
 struct Point {
@@ -49,7 +50,7 @@ pub struct GImage {
     width: u32,
     height: u32,
     avg_color: Rgba<u8>,
-    path: String
+    path: PathBuf,
 }
 
 impl GImage {
@@ -63,7 +64,7 @@ impl GImage {
             height: height,
             id: id,
             avg_color: avg_color,
-            path: format!("tmp/{}", id)
+            path: PathBuf::from(format!("./tmp/{}", id)),
         }
     }
 
@@ -104,15 +105,21 @@ impl GImage {
     }
 
     fn save_svg(&self) -> Result<()> {
+        match create_dir(self.path.parent().unwrap()) {
+            Err(e) => match e.kind() {
+                ::std::io::ErrorKind::AlreadyExists => (),
+                _ => Err(e)?,
+            },
+            Ok(_) => (),
+        }
         let mut file = File::create(&self.path)?;
         let content = self.svg_as_string();
         file.write_all(content.as_bytes())?;
         Ok(())
     }
 
-    fn raster(&self) -> RgbaImage {
-        let path = Path::new(&self.path);
-        let svg = nsvg::parse_file(path, nsvg::Units::Pixel, 96.0).unwrap();
+    fn raster(&self) -> Result<RgbaImage> {
+        let svg = nsvg::parse_file(&self.path, nsvg::Units::Pixel, 96.0)?;
         let scale = 1.0;
         svg.rasterize(scale).unwrap()
     }
