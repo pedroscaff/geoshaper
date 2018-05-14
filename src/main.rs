@@ -1,4 +1,4 @@
-extern crate clap;
+#[macro_use] extern crate clap;
 extern crate image;
 extern crate darwin_rs;
 extern crate rand;
@@ -15,9 +15,8 @@ use clap::{Arg, App};
 
 fn main() {
     let matches = App::new("geoshaper")
-        .version("0.1.0")
-        .author("Pedro Scaff <pedro@scaff.me>")
-        .author("Robert Günzler <r@gnzler.io>")
+        .version(crate_version!())
+        .author(crate_authors!(",\n"))
         .arg(
             Arg::with_name("image")
                 .short("i")
