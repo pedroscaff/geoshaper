@@ -106,7 +106,7 @@ impl GImage {
             String::from(
                 format!(
             "<svg width=\"{}\" height=\"{}\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">
-            <rect width=\"{}\" height=\"{}\" x=\"0\" y=\"0\" fill=\"{}\"/>",
+            <rect width=\"{}\" height=\"{}\" x=\"0\" y=\"0\" fill=\"rgba({})\"/>",
             self.width, self.height, self.width, self.height, rgba_to_str(&self.avg_color)),
             );
         svg.push_str(polygons.as_str());
