@@ -11,6 +11,8 @@ mod image_utils;
 mod individual;
 mod simulation;
 mod error;
+mod shape;
+mod triangle;
 
 use std::path::Path;
 use std::process;
