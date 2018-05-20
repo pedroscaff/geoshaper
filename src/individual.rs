@@ -4,13 +4,13 @@ use std::sync::Arc;
 use std::fs::{create_dir, File};
 use std::io::prelude::*;
 
+use rand::thread_rng;
+use rand::distributions::{IndependentSample, Range};
 use nsvg;
 use image::{ColorType, DynamicImage, GenericImage, Rgba, RgbaImage};
 use image::save_buffer;
-use darwin_rs::Individual;
-
-use image_utils::{image_diff, rgba_to_str};
-use shape::{Polygon};
+use image_utils::{image_diff, rgba_to_str, image_area_diff};
+use shape::{Polygon, Point};
 use error::Result;
 
 #[derive(Clone)]
@@ -24,9 +24,14 @@ pub struct GImage {
     path: PathBuf,
 }
 
+pub trait Individual {
+    fn mutate(&self, shape: Polygon, new_id: u32) -> GImage;
+    fn fitness_full(&self) -> u64;
+    fn fitness_mutation(&self) -> u64;
+}
+
 impl GImage {
-    pub fn new(id: u32, i: Arc<DynamicImage>, avg_color: Rgba<u8>) -> Self {
-        let (width, height) = i.dimensions();
+    pub fn new(id: u32, i: Arc<DynamicImage>, avg_color: Rgba<u8>, width: u32, height: u32) -> Self {
         let polygons: Vec<Polygon> = Vec::new();
         GImage {
             target: i,
@@ -39,8 +44,43 @@ impl GImage {
         }
     }
 
-    fn random_shape(&self, polygon_type: &str) -> Polygon {
-        Polygon::new(polygon_type, &self.width, &self.height)
+    /**
+     * @brief      returns the bounds of the last mutation
+     *
+     * @param      &self
+     *
+     * @return     &[Point]
+     */
+    pub fn mutation_area(&self) -> [Point; 2] {
+        let last_polygon = self.polygons.last().unwrap();
+        last_polygon.get_bounds()
+    }
+
+    pub fn get_last_polygon(&self) -> Polygon {
+        self.polygons.last().unwrap().clone()
+    }
+
+    pub fn add_polygon(&mut self, polygon: Polygon) {
+        self.polygons.push(polygon);
+    }
+
+    pub fn as_rgba_img(&self) -> Result<RgbaImage> {
+        match self.save_svg() {
+            Err(e) => {
+                error!("error saving SVG of individual {}: {}", self.id, e);
+                Err(e)
+            },
+            Ok(_) => {
+                debug!("wrote SVG for individual {}", self.id);
+                match self.raster() {
+                    Ok(r) => Ok(r),
+                    Err(e) => {
+                        error!("error rasterizing individual {}: {}", self.id, e);
+                        Err(e)
+                    }
+                }
+            }
+        }
     }
 
     fn svg_as_string(&self) -> String {
@@ -52,7 +92,7 @@ impl GImage {
             String::from(
                 format!(
             "<svg width=\"{}\" height=\"{}\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">
-            <rect width=\"{}\" height=\"{}\" x=\"0\" y=\"0\" fill=\"rgba({})\"/>",
+            <rect width=\"{}\" height=\"{}\" x=\"0\" y=\"0\" fill=\"rgb({})\"/>",
             self.width, self.height, self.width, self.height, rgba_to_str(&self.avg_color)),
             );
         svg.push_str(polygons.as_str());
@@ -98,31 +138,44 @@ impl fmt::Debug for GImage {
 }
 
 impl Individual for GImage {
-    fn mutate(&mut self) {
-        let new_shape = self.random_shape("triangle");
-        self.polygons.push(new_shape);
+    fn mutate(&self, mut candidate: Polygon, new_id: u32) -> GImage {
+        let mut rng = thread_rng();
+        let angle_generator = Range::new(0, 361);
+        let angle = angle_generator.ind_sample(&mut rng) as f32;
+        candidate.rotate(&angle);
+        let mut v : Vec<Polygon> = self.polygons.clone();
+        v.push(candidate);
+        GImage {
+            target: self.target.clone(),
+            polygons: v,
+            width: self.width,
+            height: self.height,
+            id: new_id,
+            avg_color: self.avg_color,
+            path: PathBuf::from(format!("./tmp/{}", new_id))
+        }
     }
 
-    fn calculate_fitness(&mut self) -> f64 {
+    fn fitness_mutation(&self) -> u64 {
         match self.save_svg() {
             Err(e) => {
                 error!("error saving SVG of individual {}: {}", self.id, e);
-                9999.0
+                9999
             }
             Ok(_) => {
                 debug!("wrote SVG for individual {}", self.id);
                 match self.raster() {
-                    Ok(r) => image_diff(self.target.clone(), &r),
+                    Ok(r) => image_area_diff(self.target.clone(), &r, self.mutation_area()),
                     Err(e) => {
                         error!("error rasterizing individual {}: {}", self.id, e);
-                        9999.0
+                        9999
                     }
                 }
             }
         }
     }
 
-    fn reset(&mut self) {
-        self.polygons.clear();
+    fn fitness_full(&self) -> u64 {
+        image_diff(self.target.clone(), &self.as_rgba_img().unwrap())
     }
 }
