@@ -49,21 +49,20 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
                 best_index = index;
             }
         }
-        println!("best_index {:?}", best_index);
         let winner_gene = &mutations[best_index];
-        
+
         let mutation_area_current_fitness = image_area_diff(
             target.clone(),
             &result_gene.as_rgba_img().unwrap(),
             winner_gene.mutation_area()
         );
+        if mutation_area_current_fitness > best_fitness {
+            println!("we are evolving! :)\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
             result_gene.add_polygon(winner_gene.get_last_polygon());
             result_gene.save_raster(Path::new(&format!("./tmp/result-{}.png", i))).unwrap();
-        // if mutation_area_current_fitness > best_fitness {
-        //     println!("we are evolving! :)\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
-        // } else {
-        //     println!("mutation did not improve gene :(\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
-        // }
+        } else {
+            println!("mutation did not improve gene :(\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
+        }
     }
     result_gene.save_raster(Path::new("result.png")).unwrap();
 
