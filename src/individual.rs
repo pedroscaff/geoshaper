@@ -9,7 +9,7 @@ use rand::distributions::{IndependentSample, Range};
 use nsvg;
 use image::{ColorType, DynamicImage, GenericImage, Rgba, RgbaImage};
 use image::save_buffer;
-use image_utils::{image_diff, rgba_to_str, image_area_diff};
+use image_utils::{image_diff, rgba_to_str, image_area_diff, get_average_color_from_area};
 use shape::{Polygon, Point};
 use error::Result;
 
@@ -86,14 +86,15 @@ impl GImage {
     fn svg_as_string(&self) -> String {
         let mut polygons = String::new();
         for polygon in &self.polygons {
-            polygons.push_str(polygon.svg().as_str())
+            let fill_color = get_average_color_from_area(self.target.clone(), polygon.get_bounds());
+            polygons.push_str(polygon.svg(&fill_color).as_str())
         }
         let mut svg =
             String::from(
                 format!(
-            "<svg width=\"{}\" height=\"{}\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">
+            "<svg width=\"{}\" height=\"{}\" viewbox=\"0 0 {} {}\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">
             <rect width=\"{}\" height=\"{}\" x=\"0\" y=\"0\" fill=\"rgb({})\"/>",
-            self.width, self.height, self.width, self.height, rgba_to_str(&self.avg_color)),
+            self.width, self.height, self.width, self.height, self.width, self.height, rgba_to_str(&self.avg_color)),
             );
         svg.push_str(polygons.as_str());
         svg.push_str("</svg>");
@@ -140,9 +141,13 @@ impl fmt::Debug for GImage {
 impl Individual for GImage {
     fn mutate(&self, mut candidate: Polygon, new_id: u32) -> GImage {
         let mut rng = thread_rng();
-        let angle_generator = Range::new(0, 361);
-        let angle = angle_generator.ind_sample(&mut rng) as f32;
-        candidate.rotate(&angle);
+        // let angle_generator = Range::new(0, 361);
+        // let angle = angle_generator.ind_sample(&mut rng) as f32;
+        // candidate.rotate(&angle);
+        let scale_generator = Range::new(1, 3);
+        let scale_x = scale_generator.ind_sample(&mut rng);
+        let scale_y = scale_generator.ind_sample(&mut rng);
+        candidate.scale(&scale_x, &scale_y);
         let mut v : Vec<Polygon> = self.polygons.clone();
         v.push(candidate);
         GImage {

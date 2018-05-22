@@ -12,6 +12,7 @@ use error::{Result, ResultExt};
 #[derive(Debug)]
 pub struct Options {
     pub pop_size: u32,
+    pub shape: String
 }
 
 // fn make_population(size: u32, target: Arc<DynamicImage>) -> Vec<GImage> {
@@ -33,7 +34,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
 
     for i in 0..max_iter {
         // generate candidate
-        let new_shape = Polygon::new(target.clone(), "triangle", width, height);
+        let new_shape = Polygon::new(&options.shape, width, height);
         let mut mutations : Vec<GImage> = Vec::new();
         for j in 0..num_genes {
             let new_gene = result_gene.mutate(new_shape.clone(), j);

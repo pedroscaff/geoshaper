@@ -13,6 +13,7 @@ mod simulation;
 mod error;
 mod shape;
 mod triangle;
+mod rectangle;
 
 use std::path::Path;
 use std::process;
@@ -34,6 +35,15 @@ fn main() {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("shape")
+                .short("s")
+                .long("shape")
+                .value_name("STRING")
+                .help("shape used to mimic image")
+                .takes_value(true)
+                .required(false)
+        )
         .get_matches();
 
     let img_path = matches
@@ -46,7 +56,11 @@ fn main() {
         process::exit(1);
     });
 
-    match simulation::run(Arc::new(img), simulation::Options { pop_size: 100 }) {
+    let shape = matches
+        .value_of("shape")
+        .unwrap_or("triangle");
+
+    match simulation::run(Arc::new(img), simulation::Options { pop_size: 100, shape: shape.to_string() }) {
         Ok(_) => process::exit(0),
         Err(e) => {
             eprintln!("err: {}", e);
