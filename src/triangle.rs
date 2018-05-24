@@ -46,6 +46,10 @@ impl Shape for Triangle {
         let points = vec![p1, p2, p3];
         points
     }
+
+    fn center(points: &Vec<Point>) -> Point {
+        unimplemented!();
+    }
 }
 
 #[cfg(test)]

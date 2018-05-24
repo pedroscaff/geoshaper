@@ -5,7 +5,7 @@ use std::sync::Arc;
 use image_utils::{get_average_color, image_area_diff};
 use image::GenericImage;
 use individual::Individual;
-use shape::Polygon;
+use shape::{Polygon, Shapes};
 
 use error::{Result, ResultExt};
 
@@ -32,9 +32,15 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
     let (width, height) = target.dimensions();
     let mut result_gene = GImage::new(1, target.clone(), avg_color, width, height);
 
+    let shape = match options.shape.as_str() {
+        "rectangle" => Shapes::Rectangle,
+        "triangle" => Shapes::Triangle,
+        _ => Shapes::Rectangle
+    };
+
     for i in 0..max_iter {
         // generate candidate
-        let new_shape = Polygon::new(&options.shape, width, height);
+        let new_shape = Polygon::new(shape.clone(), width, height);
         let mut mutations : Vec<GImage> = Vec::new();
         for j in 0..num_genes {
             let new_gene = result_gene.mutate(new_shape.clone(), j);

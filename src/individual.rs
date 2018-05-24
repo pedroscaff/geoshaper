@@ -141,9 +141,9 @@ impl fmt::Debug for GImage {
 impl Individual for GImage {
     fn mutate(&self, mut candidate: Polygon, new_id: u32) -> GImage {
         let mut rng = thread_rng();
-        // let angle_generator = Range::new(0, 361);
-        // let angle = angle_generator.ind_sample(&mut rng) as f32;
-        // candidate.rotate(&angle);
+        let angle_generator = Range::new(0, 361);
+        let angle = angle_generator.ind_sample(&mut rng) as f32;
+        candidate.rotate(&angle);
         let scale_generator = Range::new(1, 3);
         let scale_x = scale_generator.ind_sample(&mut rng);
         let scale_y = scale_generator.ind_sample(&mut rng);

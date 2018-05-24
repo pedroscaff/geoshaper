@@ -2,7 +2,6 @@
 extern crate env_logger;
 extern crate failure;
 #[macro_use] extern crate clap;
-extern crate rsgenetic;
 extern crate image;
 extern crate nsvg;
 extern crate rand;

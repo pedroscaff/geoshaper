@@ -1,10 +1,15 @@
-use image_utils::{get_average_color_from_area, rgba_to_str};
-use image::{self, DynamicImage, GenericImage, Rgba};
-use std::sync::Arc;
+use image_utils::{rgba_to_str};
+use image::{self, Rgba};
 use triangle::Triangle;
 use rectangle::Rectangle;
 use std::fmt;
 use std::f32::consts::PI;
+
+#[derive(Debug, Clone)]
+pub enum Shapes {
+    Rectangle,
+    Triangle,
+}
 
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -17,6 +22,7 @@ pub struct Polygon {
     pub points: Vec<Point>,
     range_x: u32,
     range_y: u32,
+    shape: Shapes,
 }
 
 fn deg2rad(deg: &f32) -> f32 {
@@ -24,16 +30,16 @@ fn deg2rad(deg: &f32) -> f32 {
 }
 
 impl Polygon {
-    pub fn new(shape: &str, range_x: u32, range_y: u32) -> Polygon {
+    pub fn new(shape: Shapes, range_x: u32, range_y: u32) -> Polygon {
         match shape {
-            "rectangle" => Polygon {
-                points: Rectangle::new(&range_x, &range_y), range_x: range_x, range_y: range_y
+            Shapes::Rectangle => Polygon {
+                points: Rectangle::new(&range_x, &range_y), range_x: range_x, range_y: range_y, shape: shape
             },
-            "triangle" => Polygon {
-                points: Triangle::new(&range_x, &range_y), range_x: range_x, range_y: range_y
+            Shapes::Triangle => Polygon {
+                points: Triangle::new(&range_x, &range_y), range_x: range_x, range_y: range_y, shape: shape
             },
             _ => Polygon {
-                points: Vec::new(), range_x: range_x, range_y: range_y
+                points: Vec::new(), range_x: range_x, range_y: range_y, shape: Shapes::Rectangle
             },
         }
     }
@@ -84,6 +90,13 @@ impl Polygon {
         [min, max]
     }
 
+    fn center(&self) -> Point {
+        match self.shape {
+            Shapes::Rectangle => Rectangle::center(&self.points),
+            _ => self.points[0].clone(),
+        }
+    }
+
     pub fn rotate(&mut self, deg: &f32) {
         let radians = deg2rad(deg);
         let sin = radians.sin();
@@ -115,6 +128,7 @@ impl Polygon {
 
 pub trait Shape {
     fn new(range_x: &u32, range_y: &u32) -> Vec<Point>;
+    fn center(points: &Vec<Point>) -> Point;
 }
 
 #[cfg(test)]
