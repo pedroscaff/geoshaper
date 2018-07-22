@@ -19,12 +19,20 @@ pub fn load_image(p: &Path) -> ImageResult<DynamicImage> {
 }
 
 pub fn get_average_color_from_area(img: Arc<DynamicImage>, bounds: [Point; 2]) -> Rgba<u8> {
+    for boundary in bounds.iter() {
+        if boundary.x < 1.0 {
+            error!("image_utils: boundaries must be at least than one!");
+        }
+        if boundary.y < 1.0 {
+            error!("image_utils: boundaries must be at least than one!");
+        }
+    }
     let mut r_sum : u32 = 0;
     let mut g_sum : u32 = 0;
     let mut b_sum : u32 = 0;
     let mut count : u32 = 0;
-    for x in bounds[0].x..bounds[1].x {
-        for y in bounds[0].y..bounds[1].y {
+    for x in bounds[0].x as u32..bounds[1].x as u32 {
+        for y in bounds[0].y as u32..bounds[1].y as u32{
             let pixel = img.get_pixel(x, y);
             r_sum += pixel.data[0] as u32;
             g_sum += pixel.data[1] as u32;
@@ -62,11 +70,11 @@ pub fn get_average_color(img: Arc<DynamicImage>) -> Rgba<u8> {
     }
 }
 
-pub fn image_area_diff(img1: Arc<DynamicImage>, img2: &RgbaImage, bounds: [Point; 2]) -> u64 {
+pub fn image_area_diff(img1: Arc<DynamicImage>, img2: &RgbaImage, bounds: [Point; 2]) -> f32 {
     let mut total : u64 = 0;
     let mut count : u64 = 0;
-    for x in bounds[0].x..bounds[1].x {
-        for y in bounds[0].y..bounds[1].y {
+    for x in bounds[0].x as u32..bounds[1].x as u32 {
+        for y in bounds[0].y as u32..bounds[1].y as u32{
             let p1 = img1.get_pixel(x, y);
             let p2 = img2.get_pixel(x, y);
             let r1 = p1.data[0] as i32;
@@ -82,7 +90,7 @@ pub fn image_area_diff(img1: Arc<DynamicImage>, img2: &RgbaImage, bounds: [Point
             count += 1;    
         }
     }
-    ((total / count) as f64).sqrt() as u64
+    ((total / count) as f32).sqrt()
 }
 
 pub fn image_diff(img1: Arc<DynamicImage>, img2: &RgbaImage) -> u64 {

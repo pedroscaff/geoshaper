@@ -1,3 +1,4 @@
+use image::Rgba;
 use image::DynamicImage;
 use individual::GImage;
 use std::path::Path;
@@ -15,15 +16,6 @@ pub struct Options {
     pub shape: String
 }
 
-// fn make_population(size: u32, target: Arc<DynamicImage>) -> Vec<GImage> {
-//     let mut pop_array: Vec<GImage> = Vec::with_capacity(size as usize);
-//     let avg_color = get_average_color(target.clone());
-//     for i in 0..size {
-//         pop_array.push(GImage::new(i, target.clone(), avg_color));
-//     }
-//     pop_array
-// }
-
 pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
     // let mut population = make_population(options.pop_size, target);
     let max_iter = 200;
@@ -31,6 +23,8 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
     let avg_color = get_average_color(target.clone());
     let (width, height) = target.dimensions();
     let mut result_gene = GImage::new(1, target.clone(), avg_color, width, height);
+    let width = width as f32;
+    let height = height as f32;
 
     let shape = match options.shape.as_str() {
         "rectangle" => Shapes::Rectangle,
@@ -38,16 +32,17 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         _ => Shapes::Rectangle
     };
 
+    let mut evolutions = 0;
     for i in 0..max_iter {
         // generate candidate
-        let new_shape = Polygon::new(shape.clone(), width, height);
+        let new_shape = Polygon::new(shape, width, height);
         let mut mutations : Vec<GImage> = Vec::new();
         for j in 0..num_genes {
             let new_gene = result_gene.mutate(new_shape.clone(), j);
             mutations.push(new_gene);
         } 
 
-        let mut best_fitness = 10_000_000;
+        let mut best_fitness = 10_000_000.0;
         let mut best_index = 0;
         for (index, ref gene) in mutations.iter().enumerate() {
             let fitness = gene.fitness_mutation();
@@ -57,6 +52,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
             }
         }
         let winner_gene = &mutations[best_index];
+        println!("we have a winner: {}", winner_gene.get_last_polygon().svg());
 
         let mutation_area_current_fitness = image_area_diff(
             target.clone(),
@@ -66,7 +62,8 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         if mutation_area_current_fitness > best_fitness {
             println!("we are evolving! :)\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
             result_gene.add_polygon(winner_gene.get_last_polygon());
-            result_gene.save_raster(Path::new(&format!("./tmp/result-{}.png", i))).unwrap();
+            result_gene.save_raster(Path::new(&format!("./tmp/evolution-{}.png", evolutions))).unwrap();
+            evolutions += 1;
         } else {
             println!("mutation did not improve gene :(\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
         }

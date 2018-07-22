@@ -8,20 +8,20 @@ pub struct Triangle {
 }
 
 impl Shape for Triangle {
-    fn new(range_x: &u32, range_y: &u32) -> Vec<Point> {
+    fn new(range_x: &f32, range_y: &f32) -> Vec<Point> {
         let mut rng = thread_rng();
         let n_tiles = 4;
         let x_index_generator = Range::new(0, n_tiles);
         let y_index_generator = Range::new(0, n_tiles);
         let (tile_x, tile_y) = (
-            x_index_generator.ind_sample(&mut rng),
-            y_index_generator.ind_sample(&mut rng)
+            x_index_generator.ind_sample(&mut rng) as f32,
+            y_index_generator.ind_sample(&mut rng) as f32
         );
-        let tile_size_x = range_x / n_tiles;
-        let tile_size_y = range_y / n_tiles;
+        let tile_size_x = range_x / n_tiles as f32;
+        let tile_size_y = range_y / n_tiles as f32;
         let (x_coord_generator, y_coord_generator) = (
-            Range::new(tile_size_x * tile_x, tile_size_x * (tile_x + 1)),
-            Range::new(tile_size_y * tile_y, tile_size_y * (tile_y + 1))
+            Range::new(tile_size_x * tile_x, tile_size_x * (tile_x + 1.0)),
+            Range::new(tile_size_y * tile_y, tile_size_y * (tile_y + 1.0))
         );
         // let x_generator = Range::new(img_tile * tile_size_x, (img_tile + 1) * tile_size_x);
         // let y_generator = Range::new(img_tile * tile_size_y, (img_tile + 1) * tile_size_y);
@@ -58,10 +58,10 @@ mod tests {
 
     #[test]
     fn should_be_within_range() {
-        let points = Triangle::new(&512, &512);
+        let points = Triangle::new(&512.0, &512.0);
         for point in &points {
-            assert!(point.x < 512);
-            assert!(point.y < 512);
+            assert!(point.x < 512.0);
+            assert!(point.y < 512.0);
         }
     }
 }
