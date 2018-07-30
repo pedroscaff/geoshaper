@@ -145,13 +145,14 @@ impl Individual for GImage {
         let fill_color = get_average_color_from_area(self.target.clone(), bounds);
         candidate.set_fill_color(fill_color);
         let mut rng = thread_rng();
-        let angle_generator = Range::new(0, 181);
+        let scale_generator = Range::new(0.5, 2.0);
+        let scale_x = scale_generator.ind_sample(&mut rng);
+        let scale_y = scale_generator.ind_sample(&mut rng);
+        debug!("scale factors (x, y): {} {}", scale_x, scale_y);
+        candidate.scale(&scale_x, &scale_y);
+        let angle_generator = Range::new(0, 91);
         let angle = angle_generator.ind_sample(&mut rng) as f32;
         candidate.rotate(&angle);
-        // let scale_generator = Range::new(1.0, 3.0);
-        // let scale_x = scale_generator.ind_sample(&mut rng);
-        // let scale_y = scale_generator.ind_sample(&mut rng);
-        // candidate.scale(&scale_x, &scale_y);
         let mut v : Vec<Polygon> = self.polygons.clone();
         v.push(candidate);
         GImage {
@@ -172,7 +173,7 @@ impl Individual for GImage {
                 9999.0
             }
             Ok(_) => {
-                debug!("wrote SVG for individual {}", self.id);
+                // debug!("wrote SVG for individual {}", self.id);
                 match self.raster() {
                     Ok(r) => image_area_diff(self.target.clone(), &r, self.mutation_area()),
                     Err(e) => {

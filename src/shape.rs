@@ -105,10 +105,15 @@ impl Polygon {
     }
 
     pub fn scale(&mut self, scale_x: &f32, scale_y: &f32) {
-        for point in &mut self.points {
-            point.x *= scale_x;
-            point.y *= scale_y;
-        }
+        // for point in &mut self.points {
+        //     point.x *= scale_x;
+        //     point.y *= scale_y;
+        // }
+        // self.clamp_values();
+        match self.shape {
+            Shapes::Rectangle => Rectangle::scale(&mut self.points, scale_x, scale_y),
+            _ => (),
+        };
         self.clamp_values();
     }
 
@@ -142,6 +147,7 @@ impl Polygon {
 pub trait Shape {
     fn new(range_x: &f32, range_y: &f32) -> Vec<Point>;
     fn center(points: &Vec<Point>) -> Point;
+    fn scale(points: &mut Vec<Point>, scale_x: &f32, scale_y: &f32);
 }
 
 #[cfg(test)]

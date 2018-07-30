@@ -50,6 +50,10 @@ impl Shape for Triangle {
     fn center(points: &Vec<Point>) -> Point {
         unimplemented!();
     }
+
+    fn scale(points: &mut Vec<Point>, scale_x: &f32, scale_y: &f32) {
+        unimplemented!();
+    }
 }
 
 #[cfg(test)]
