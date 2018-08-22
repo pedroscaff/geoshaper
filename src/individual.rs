@@ -65,20 +65,11 @@ impl GImage {
     }
 
     pub fn as_rgba_img(&self) -> Result<RgbaImage> {
-        match self.save_svg() {
+        match self.raster() {
+            Ok(r) => Ok(r),
             Err(e) => {
-                error!("error saving SVG of individual {}: {}", self.id, e);
+                error!("error rasterizing individual {}: {}", self.id, e);
                 Err(e)
-            },
-            Ok(_) => {
-                debug!("wrote SVG for individual {}", self.id);
-                match self.raster() {
-                    Ok(r) => Ok(r),
-                    Err(e) => {
-                        error!("error rasterizing individual {}: {}", self.id, e);
-                        Err(e)
-                    }
-                }
             }
         }
     }
@@ -102,22 +93,8 @@ impl GImage {
         svg
     }
 
-    fn save_svg(&self) -> Result<()> {
-        match create_dir(self.path.parent().unwrap()) {
-            Err(e) => match e.kind() {
-                ::std::io::ErrorKind::AlreadyExists => (),
-                _ => Err(e)?,
-            },
-            Ok(_) => (),
-        }
-        let mut file = File::create(&self.path)?;
-        let content = self.svg_as_string();
-        file.write_all(content.as_bytes())?;
-        Ok(())
-    }
-
     fn raster(&self) -> Result<RgbaImage> {
-        let svg = nsvg::parse_file(&self.path, nsvg::Units::Pixel, 96.0)?;
+        let svg = nsvg::parse_str(&self.svg_as_string(), nsvg::Units::Pixel, 96.0)?;
         let scale = 1.0;
         Ok(svg.rasterize(scale)?)
     }
@@ -167,20 +144,11 @@ impl Individual for GImage {
     }
 
     fn fitness_mutation(&self) -> f32 {
-        match self.save_svg() {
+        match self.raster() {
+            Ok(r) => image_area_diff(self.target.clone(), &r, self.mutation_area()),
             Err(e) => {
-                error!("error saving SVG of individual {}: {}", self.id, e);
+                error!("error rasterizing individual {}: {}", self.id, e);
                 9999.0
-            }
-            Ok(_) => {
-                // debug!("wrote SVG for individual {}", self.id);
-                match self.raster() {
-                    Ok(r) => image_area_diff(self.target.clone(), &r, self.mutation_area()),
-                    Err(e) => {
-                        error!("error rasterizing individual {}: {}", self.id, e);
-                        9999.0
-                    }
-                }
             }
         }
     }
