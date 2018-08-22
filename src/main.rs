@@ -1,22 +1,12 @@
-#[macro_use] extern crate log;
-extern crate env_logger;
-extern crate failure;
 #[macro_use] extern crate clap;
-extern crate image;
-extern crate nsvg;
-extern crate rand;
+extern crate env_logger;
 
-mod image_utils;
-mod individual;
-mod simulation;
-mod error;
-mod shape;
-mod triangle;
-mod rectangle;
+extern crate geoshaper;
+
+use geoshaper::simulation;
 
 use std::path::Path;
 use std::process;
-use std::sync::Arc;
 use clap::{App, Arg};
 
 fn main() {
@@ -43,6 +33,14 @@ fn main() {
                 .takes_value(true)
                 .required(false)
         )
+        .arg(
+            Arg::with_name("debug")
+                .short("d")
+                .long("debug")
+                .help("render incremental rasters")
+                .takes_value(false)
+                .required(false)
+        )
         .get_matches();
 
     let img_path = matches
@@ -50,16 +48,15 @@ fn main() {
         .map(|istr| Path::new(istr))
         .unwrap();
 
-    let img = image_utils::load_image(img_path).unwrap_or_else(|e| {
-        eprintln!("opening image failed: {}", e);
-        process::exit(1);
-    });
-
     let shape = matches
         .value_of("shape")
         .unwrap_or("triangle");
 
-    match simulation::run(Arc::new(img), simulation::Options { pop_size: 100, shape: shape.to_string() }) {
+    let mut options = simulation::Options::default();
+    options.shape = shape.to_owned();
+    options.render_debug_rasters = matches.is_present("debug");
+
+    match geoshaper::run(&img_path, Some(options)) {
         Ok(_) => process::exit(0),
         Err(e) => {
             eprintln!("err: {}", e);
