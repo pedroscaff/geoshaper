@@ -1,8 +1,7 @@
 use image_utils::{rgba_to_str};
-use image::{self, Rgba};
+use image::Rgba;
 use triangle::Triangle;
 use rectangle::Rectangle;
-use std::fmt;
 use std::f32::consts::PI;
 
 #[derive(Debug, Clone, Copy)]

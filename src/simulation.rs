@@ -1,4 +1,3 @@
-use image::Rgba;
 use std::default::Default;
 use image::DynamicImage;
 use individual::GImage;
