@@ -90,16 +90,16 @@ impl Polygon {
         let rotation_point = self.center();
         let r_x = rotation_point.x;
         let r_y = rotation_point.y;
-        debug!("rotation degree: {}", deg);
-        debug!("rotation center: {:?}", rotation_point);
-        debug!("values before rotation: {:?}", self.points);
+        // debug!("rotation degree: {}", deg);
+        // debug!("rotation center: {:?}", rotation_point);
+        // debug!("values before rotation: {:?}", self.points);
         for point in &mut self.points {
             let x = (point.x - r_x) * cos - (point.y - r_y) * sin;
             let y = (point.x - r_x) * sin + (point.y - r_y) * cos;
             point.x = x + r_x;
             point.y = y + r_y;
         };
-        debug!("values after rotation: {:?}", self.points);
+        // debug!("values after rotation: {:?}", self.points);
         self.clamp_values();
     }
 
@@ -126,17 +126,17 @@ impl Polygon {
     fn clamp_values(&mut self) {
         for point in &mut self.points {
             if point.x >= self.range_x {
-                debug!("clamping value for shape: from: {}, to: {}", point.x, self.range_x);
+                // debug!("clamping value for shape: from: {}, to: {}", point.x, self.range_x);
                 point.x = self.range_x - 1.0;
             } else if point.x < 0.0 {
-                debug!("clamping value for shape: from: {}, to: {}", point.x, 0.0);
+                // debug!("clamping value for shape: from: {}, to: {}", point.x, 0.0);
                 point.x = 0.0;
             }
             if point.y >= self.range_y {
-                debug!("clamping value for shape: from: {}, to: {}", point.y, self.range_y);
+                // debug!("clamping value for shape: from: {}, to: {}", point.y, self.range_y);
                 point.y = self.range_y - 1.0;
             } else if point.y < 0.0 {
-                debug!("clamping value for shape: from: {}, to: {}", point.y, 0.0);
+                // debug!("clamping value for shape: from: {}, to: {}", point.y, 0.0);
                 point.y = 0.0;
             }
         }

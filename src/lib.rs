@@ -3,6 +3,7 @@ extern crate failure;
 extern crate image;
 extern crate nsvg;
 extern crate rand;
+extern crate scoped_threadpool;
 
 pub mod simulation;
 mod image_utils;

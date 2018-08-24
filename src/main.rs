@@ -41,6 +41,15 @@ fn main() {
                 .takes_value(false)
                 .required(false)
         )
+        .arg(
+            Arg::with_name("maxiter")
+                .short("mi")
+                .long("maxiter")
+                .value_name("INTEGER")
+                .help("maximum number of iterations")
+                .takes_value(true)
+                .required(false)
+        )
         .get_matches();
 
     let img_path = matches
@@ -48,12 +57,13 @@ fn main() {
         .map(|istr| Path::new(istr))
         .unwrap();
 
-    let shape = matches
-        .value_of("shape")
-        .unwrap_or("triangle");
-
     let mut options = simulation::Options::default();
-    options.shape = shape.to_owned();
+    if matches.is_present("shape") {
+        options.shape = matches.value_of("shape").unwrap().to_string();
+    }
+    if matches.is_present("maxiter") {
+        options.max_iter = matches.value_of("maxiter").unwrap().parse().unwrap();
+    }
     options.render_debug_rasters = matches.is_present("debug");
 
     match geoshaper::run(&img_path, Some(options)) {

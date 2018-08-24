@@ -74,6 +74,10 @@ impl GImage {
         }
     }
 
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
     fn svg_as_string(&self) -> String {
         let mut polygons = String::new();
         for polygon in &self.polygons {
@@ -125,7 +129,7 @@ impl Individual for GImage {
         let scale_generator = Range::new(0.5, 2.0);
         let scale_x = scale_generator.ind_sample(&mut rng);
         let scale_y = scale_generator.ind_sample(&mut rng);
-        debug!("scale factors (x, y): {} {}", scale_x, scale_y);
+        // debug!("scale factors (x, y): {} {}", scale_x, scale_y);
         candidate.scale(&scale_x, &scale_y);
         let angle_generator = Range::new(0, 91);
         let angle = angle_generator.ind_sample(&mut rng) as f32;
@@ -170,7 +174,9 @@ mod tests {
 
     #[test]
     fn should_add_polygon() {
-        let img = image_utils::load_image(Path::new("./lena_std.tif")).unwrap_or_else(|e| {
+        let root_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let img_path = root_dir.join(Path::new("lena_std.tif"));
+        let img = image_utils::load_image(&img_path).unwrap_or_else(|e| {
             eprintln!("opening image failed: {}", e);
             process::exit(1);
         });
@@ -184,7 +190,9 @@ mod tests {
 
     #[test]
     fn shoud_return_last_polygon() {
-        let img = image_utils::load_image(Path::new("./lena_std.tif")).unwrap_or_else(|e| {
+        let root_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let img_path = root_dir.join(Path::new("lena_std.tif"));
+        let img = image_utils::load_image(&img_path).unwrap_or_else(|e| {
             eprintln!("opening image failed: {}", e);
             process::exit(1);
         });
@@ -204,7 +212,9 @@ mod tests {
 
     #[test]
     fn should_mutate() {
-        let img = image_utils::load_image(Path::new("./lena_std.tif")).unwrap_or_else(|e| {
+        let root_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let img_path = root_dir.join(Path::new("lena_std.tif"));
+        let img = image_utils::load_image(&img_path).unwrap_or_else(|e| {
             eprintln!("opening image failed: {}", e);
             process::exit(1);
         });
