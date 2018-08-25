@@ -1,7 +1,6 @@
-use shape::{Shape, Point};
-use rand::thread_rng;
 use rand::distributions::{IndependentSample, Range};
-
+use rand::thread_rng;
+use shape::{Point, Shape};
 
 /**
  * p0--p1
@@ -12,7 +11,7 @@ use rand::distributions::{IndependentSample, Range};
  */
 #[derive(Debug)]
 pub struct Rectangle {
-    points: Vec<Point>
+    points: Vec<Point>,
 }
 
 impl Shape for Rectangle {
@@ -46,7 +45,7 @@ impl Shape for Rectangle {
     fn center(points: &Vec<Point>) -> Point {
         Point {
             x: (points[1].x + points[0].x) / 2.0,
-            y: (points[3].y + points[0].y) / 2.0
+            y: (points[3].y + points[0].y) / 2.0,
         }
     }
 
@@ -77,22 +76,10 @@ mod tests {
 
     #[test]
     fn should_scale() {
-        let p0 = Point {
-            x: 0.0,
-            y: 0.0,
-        };
-        let p1 = Point {
-            x: 5.0,
-            y: 0.0,
-        };
-        let p2 = Point {
-            x: 5.0,
-            y: 5.0,
-        };
-        let p3 = Point {
-            x: 0.0,
-            y: 5.0,
-        };
+        let p0 = Point { x: 0.0, y: 0.0 };
+        let p1 = Point { x: 5.0, y: 0.0 };
+        let p2 = Point { x: 5.0, y: 5.0 };
+        let p3 = Point { x: 0.0, y: 5.0 };
         let mut points = vec![p0, p1, p2, p3];
         Rectangle::scale(&mut points, &2.0, &2.0);
         // should remain the same

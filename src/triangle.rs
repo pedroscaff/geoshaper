@@ -1,10 +1,10 @@
-use shape::{Shape, Point};
-use rand::thread_rng;
 use rand::distributions::{IndependentSample, Range};
+use rand::thread_rng;
+use shape::{Point, Shape};
 
 #[derive(Debug)]
 pub struct Triangle {
-    points: Vec<Point>
+    points: Vec<Point>,
 }
 
 impl Shape for Triangle {
@@ -15,13 +15,13 @@ impl Shape for Triangle {
         let y_index_generator = Range::new(0, n_tiles);
         let (tile_x, tile_y) = (
             x_index_generator.ind_sample(&mut rng) as f32,
-            y_index_generator.ind_sample(&mut rng) as f32
+            y_index_generator.ind_sample(&mut rng) as f32,
         );
         let tile_size_x = range_x / n_tiles as f32;
         let tile_size_y = range_y / n_tiles as f32;
         let (x_coord_generator, y_coord_generator) = (
             Range::new(tile_size_x * tile_x, tile_size_x * (tile_x + 1.0)),
-            Range::new(tile_size_y * tile_y, tile_size_y * (tile_y + 1.0))
+            Range::new(tile_size_y * tile_y, tile_size_y * (tile_y + 1.0)),
         );
         // let x_generator = Range::new(img_tile * tile_size_x, (img_tile + 1) * tile_size_x);
         // let y_generator = Range::new(img_tile * tile_size_y, (img_tile + 1) * tile_size_y);
@@ -47,11 +47,11 @@ impl Shape for Triangle {
         points
     }
 
-    fn center(points: &Vec<Point>) -> Point {
+    fn center(_points: &Vec<Point>) -> Point {
         unimplemented!();
     }
 
-    fn scale(points: &mut Vec<Point>, scale_x: &f32, scale_y: &f32) {
+    fn scale(_points: &mut Vec<Point>, _scale_x: &f32, _scale_y: &f32) {
         unimplemented!();
     }
 }

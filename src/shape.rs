@@ -1,8 +1,8 @@
-use image_utils::{rgba_to_str};
 use image::Rgba;
-use triangle::Triangle;
+use image_utils::rgba_to_str;
 use rectangle::Rectangle;
 use std::f32::consts::PI;
+use triangle::Triangle;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Shapes {
@@ -22,7 +22,7 @@ pub struct Polygon {
     range_x: f32,
     range_y: f32,
     shape: Shapes,
-    fill_color: Rgba<u8>
+    fill_color: Rgba<u8>,
 }
 
 fn deg2rad(deg: &f32) -> f32 {
@@ -32,16 +32,24 @@ fn deg2rad(deg: &f32) -> f32 {
 impl Polygon {
     pub fn new(shape: Shapes, range_x: f32, range_y: f32) -> Polygon {
         let default_white_color = Rgba {
-            data: [255 as u8, 255 as u8, 255 as u8, 255]
+            data: [255 as u8, 255 as u8, 255 as u8, 255],
         };
 
         match shape {
             Shapes::Rectangle => Polygon {
-                points: Rectangle::new(&range_x, &range_y), range_x: range_x, range_y: range_y, shape: shape, fill_color: default_white_color
+                points: Rectangle::new(&range_x, &range_y),
+                range_x: range_x,
+                range_y: range_y,
+                shape: shape,
+                fill_color: default_white_color,
             },
             Shapes::Triangle => Polygon {
-                points: Triangle::new(&range_x, &range_y), range_x: range_x, range_y: range_y, shape: shape, fill_color: default_white_color
-            }
+                points: Triangle::new(&range_x, &range_y),
+                range_x: range_x,
+                range_y: range_y,
+                shape: shape,
+                fill_color: default_white_color,
+            },
         }
     }
 
@@ -57,7 +65,8 @@ impl Polygon {
         }
         format!(
             "<polygon points=\"{}\" fill=\"rgb({})\" fill-opacity=\"0.7\"/>",
-            points_str, rgba_to_str(&self.fill_color)
+            points_str,
+            rgba_to_str(&self.fill_color)
         )
     }
 
@@ -98,7 +107,7 @@ impl Polygon {
             let y = (point.x - r_x) * sin + (point.y - r_y) * cos;
             point.x = x + r_x;
             point.y = y + r_y;
-        };
+        }
         // debug!("values after rotation: {:?}", self.points);
         self.clamp_values();
     }
