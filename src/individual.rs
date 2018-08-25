@@ -1,17 +1,15 @@
-use std::path::{Path, PathBuf};
 use std::fmt;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::fs::{create_dir, File};
-use std::io::prelude::*;
 
-use rand::thread_rng;
-use rand::distributions::{IndependentSample, Range};
-use nsvg;
-use image::{ColorType, DynamicImage, GenericImage, Rgba, RgbaImage};
-use image::save_buffer;
-use image_utils::{image_diff, rgba_to_str, image_area_diff, get_average_color_from_area};
-use shape::{Polygon, Point};
 use error::Result;
+use image::save_buffer;
+use image::{ColorType, DynamicImage, GenericImage, Rgba, RgbaImage};
+use image_utils::{get_average_color_from_area, image_area_diff, image_diff, rgba_to_str};
+use nsvg;
+use rand::distributions::{IndependentSample, Range};
+use rand::thread_rng;
+use shape::{Point, Polygon};
 
 #[derive(Clone)]
 pub struct GImage {
@@ -31,7 +29,13 @@ pub trait Individual {
 }
 
 impl GImage {
-    pub fn new(id: u32, i: Arc<DynamicImage>, avg_color: Rgba<u8>, width: u32, height: u32) -> Self {
+    pub fn new(
+        id: u32,
+        i: Arc<DynamicImage>,
+        avg_color: Rgba<u8>,
+        width: u32,
+        height: u32,
+    ) -> Self {
         let polygons: Vec<Polygon> = Vec::new();
         GImage {
             target: i,
@@ -134,7 +138,7 @@ impl Individual for GImage {
         let angle_generator = Range::new(0, 91);
         let angle = angle_generator.ind_sample(&mut rng) as f32;
         candidate.rotate(&angle);
-        let mut v : Vec<Polygon> = self.polygons.clone();
+        let mut v: Vec<Polygon> = self.polygons.clone();
         v.push(candidate);
         GImage {
             target: self.target.clone(),
@@ -143,7 +147,7 @@ impl Individual for GImage {
             height: self.height,
             id: new_id,
             avg_color: self.avg_color,
-            path: PathBuf::from(format!("./tmp/{}", new_id))
+            path: PathBuf::from(format!("./tmp/{}", new_id)),
         }
     }
 
@@ -164,13 +168,13 @@ impl Individual for GImage {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use image::Rgba;
     use image_utils;
     use shape::Shapes;
-    use std::sync::Arc;
     use std::path::Path;
     use std::process;
-    use super::*;
+    use std::sync::Arc;
 
     #[test]
     fn should_add_polygon() {

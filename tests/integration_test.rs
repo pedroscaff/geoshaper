@@ -1,7 +1,7 @@
 extern crate geoshaper;
 
-use std::path::Path;
 use std::fs::remove_file;
+use std::path::Path;
 
 #[test]
 fn smoke() {

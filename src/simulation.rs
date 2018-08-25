@@ -1,14 +1,13 @@
-use std::default::Default;
 use image::DynamicImage;
+use image::GenericImage;
+use image_utils::{get_average_color, image_area_diff};
 use individual::GImage;
+use individual::Individual;
+use scoped_threadpool::Pool;
+use shape::{Polygon, Shapes};
+use std::default::Default;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
-use std::thread;
-use image_utils::{get_average_color, image_area_diff};
-use image::GenericImage;
-use individual::Individual;
-use shape::{Polygon, Shapes};
-use scoped_threadpool::Pool;
 
 use error::Result;
 
@@ -23,7 +22,7 @@ pub struct Options {
 
 impl Default for Options {
     fn default() -> Self {
-        Options{
+        Options {
             pop_size: 100,
             shape: "rectangle".to_owned(),
             max_iter: 200,
@@ -44,14 +43,14 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
     let shape = match options.shape.as_str() {
         "rectangle" => Shapes::Rectangle,
         "triangle" => Shapes::Triangle,
-        _ => Shapes::Rectangle
+        _ => Shapes::Rectangle,
     };
 
     let mut evolutions = 0;
-    for i in 0..options.max_iter {
+    for _i in 0..options.max_iter {
         // generate candidate
         let new_shape = Polygon::new(shape, width, height);
-        let mut mutations : Vec<GImage> = Vec::new();
+        let mut mutations: Vec<GImage> = Vec::new();
         for j in 0..options.num_genes {
             let new_gene = result_gene.mutate(new_shape.clone(), j);
             mutations.push(new_gene);
@@ -78,28 +77,39 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
             }
         });
 
-        let winner_gene = mutations.iter().find(|ref mutation| mutation.id() == *best_id.lock().unwrap()).unwrap();
+        let winner_gene = mutations
+            .iter()
+            .find(|ref mutation| mutation.id() == *best_id.lock().unwrap())
+            .unwrap();
         debug!("we have a winner: {}", winner_gene.get_last_polygon().svg());
 
         let mutation_area_current_fitness = image_area_diff(
             target.clone(),
             &result_gene.as_rgba_img().unwrap(),
-            winner_gene.mutation_area()
+            winner_gene.mutation_area(),
         );
 
         // no need to be mutex anymore
         let best_fitness = *best_fitness.lock().unwrap();
         if mutation_area_current_fitness > best_fitness {
-            debug!("we are evolving! :)\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
+            debug!(
+                "we are evolving! :)\ncurrent score: {}, mutation score: {}",
+                mutation_area_current_fitness, best_fitness
+            );
             result_gene.add_polygon(winner_gene.get_last_polygon());
 
             if options.render_debug_rasters {
-                result_gene.save_raster(Path::new(&format!("./tmp/evolution-{}.png", evolutions))).unwrap();
+                result_gene
+                    .save_raster(Path::new(&format!("./tmp/evolution-{}.png", evolutions)))
+                    .unwrap();
             }
 
             evolutions += 1;
         } else {
-            debug!("mutation did not improve gene :(\ncurrent score: {}, mutation score: {}", mutation_area_current_fitness, best_fitness);
+            debug!(
+                "mutation did not improve gene :(\ncurrent score: {}, mutation score: {}",
+                mutation_area_current_fitness, best_fitness
+            );
         }
     }
     result_gene.save_raster(Path::new("result.png")).unwrap();

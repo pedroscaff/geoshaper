@@ -1,13 +1,14 @@
-#[macro_use] extern crate clap;
+#[macro_use]
+extern crate clap;
 extern crate env_logger;
 
 extern crate geoshaper;
 
 use geoshaper::simulation;
 
+use clap::{App, Arg};
 use std::path::Path;
 use std::process;
-use clap::{App, Arg};
 
 fn main() {
     env_logger::init();
@@ -31,7 +32,7 @@ fn main() {
                 .value_name("STRING")
                 .help("shape used to mimic image")
                 .takes_value(true)
-                .required(false)
+                .required(false),
         )
         .arg(
             Arg::with_name("debug")
@@ -39,7 +40,7 @@ fn main() {
                 .long("debug")
                 .help("render incremental rasters")
                 .takes_value(false)
-                .required(false)
+                .required(false),
         )
         .arg(
             Arg::with_name("maxiter")
@@ -48,7 +49,7 @@ fn main() {
                 .value_name("INTEGER")
                 .help("maximum number of iterations")
                 .takes_value(true)
-                .required(false)
+                .required(false),
         )
         .get_matches();
 
