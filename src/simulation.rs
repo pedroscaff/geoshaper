@@ -80,12 +80,12 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         let winner_gene = mutations
             .iter()
             .find(|ref mutation| mutation.id() == *best_id.read().unwrap())
-            .unwrap();
+            .ok_or(format_err!("Unexpected end of mutation list, unable to find winner gene"))?;
         debug!("we have a winner: {}", winner_gene.get_last_polygon().svg());
 
         let mutation_area_current_fitness = image_area_diff(
             target.clone(),
-            &result_gene.as_rgba_img().unwrap(),
+            &result_gene.as_rgba_img()?,
             winner_gene.mutation_area(),
         );
 
@@ -100,8 +100,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
 
             if options.render_debug_rasters {
                 result_gene
-                    .save_raster(Path::new(&format!("./tmp/evolution-{}.png", evolutions)))
-                    .unwrap();
+                    .save_raster(Path::new(&format!("./tmp/evolution-{}.png", evolutions)))?;
             }
 
             evolutions += 1;
@@ -112,7 +111,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
             );
         }
     }
-    result_gene.save_raster(Path::new("result.png")).unwrap();
+    result_gene.save_raster(Path::new("result.png"))?;
     println!("result saved to result.png");
 
     Ok(())
