@@ -33,6 +33,11 @@ impl Default for Options {
 }
 
 pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
+    info!(
+        "running simulation, shape: {}, max_generations: {}, max_genes: {}",
+        options.shape, options.max_iter, options.num_genes
+    );
+
     // let mut population = make_population(options.pop_size, target);
     let avg_color = get_average_color(target.clone());
     let (width, height) = target.dimensions();
@@ -47,7 +52,9 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
     };
 
     let mut evolutions = 0;
-    for _i in 0..options.max_iter {
+    for i in 0..options.max_iter {
+        debug!("generation {}", i);
+
         // generate candidate
         let new_shape = Polygon::new(shape, width, height);
         let mut mutations: Vec<GImage> = Vec::new();
@@ -81,6 +88,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
             .iter()
             .find(|ref mutation| mutation.id() == *best_id.read().unwrap())
             .ok_or(format_err!("Unexpected end of mutation list, unable to find winner gene"))?;
+
         debug!("we have a winner: {}", winner_gene.get_last_polygon().svg());
 
         let mutation_area_current_fitness = image_area_diff(
@@ -92,27 +100,30 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         // no need to be mutex anymore
         let best_fitness = *best_fitness.read().unwrap();
         if mutation_area_current_fitness > best_fitness {
-            debug!(
-                "we are evolving! :)\ncurrent score: {}, mutation score: {}",
+            info!(
+                "we are evolving! :) current score: {}, mutation score: {}",
                 mutation_area_current_fitness, best_fitness
             );
             result_gene.add_polygon(winner_gene.get_last_polygon());
 
             if options.render_debug_rasters {
-                result_gene
-                    .save_raster(Path::new(&format!("./tmp/evolution-{}.png", evolutions)))?;
+                let fname = format!("./tmp/evolution-{}.png", evolutions);
+                debug!("saving raster of the current generation: {}", fname);
+                result_gene.save_raster(Path::new(&fname))?;
             }
 
             evolutions += 1;
         } else {
-            debug!(
+            warn!(
                 "mutation did not improve gene :(\ncurrent score: {}, mutation score: {}",
                 mutation_area_current_fitness, best_fitness
             );
         }
     }
+    debug!("finished.");
+
     result_gene.save_raster(Path::new("result.png"))?;
-    println!("result saved to result.png");
+    info!("result saved to result.png");
 
     Ok(())
 }
