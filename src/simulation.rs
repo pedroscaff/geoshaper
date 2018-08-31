@@ -87,7 +87,9 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         let winner_gene = mutations
             .iter()
             .find(|ref mutation| mutation.id() == *best_id.read().unwrap())
-            .ok_or(format_err!("Unexpected end of mutation list, unable to find winner gene"))?;
+            .ok_or(format_err!(
+                "Unexpected end of mutation list, unable to find winner gene"
+            ))?;
 
         debug!("we have a winner: {}", winner_gene.get_last_polygon().svg());
 

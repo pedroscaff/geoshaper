@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn test_image_area_diff() {
         let i = Arc::new(get_test_image());
-        let bounds = &[Point{x: 0.0,y: 0.0}, Point{x: 10.0, y: 10.0}];
+        let bounds = &[Point { x: 0.0, y: 0.0 }, Point { x: 10.0, y: 10.0 }];
         let score = image_area_diff(i.clone(), &i.to_rgba(), bounds);
         assert_eq!(0.0, score);
     }
