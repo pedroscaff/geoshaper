@@ -62,7 +62,7 @@ pub fn get_average_color(img: Arc<DynamicImage>) -> Rgba<u8> {
     }
 }
 
-pub fn image_area_diff(img1: Arc<DynamicImage>, img2: &RgbaImage, bounds: [Point; 2]) -> f32 {
+pub fn image_area_diff(img1: Arc<DynamicImage>, img2: &RgbaImage, bounds: &[Point; 2]) -> f32 {
     check_bounds(&bounds);
     let mut total: u64 = 0;
     let mut count: u64 = 0;
@@ -86,7 +86,7 @@ pub fn image_area_diff(img1: Arc<DynamicImage>, img2: &RgbaImage, bounds: [Point
     ((total / count) as f32).sqrt()
 }
 
-pub fn image_diff(img1: Arc<DynamicImage>, img2: &RgbaImage) -> u64 {
+pub fn image_diff(img1: Arc<DynamicImage>, img2: &RgbaImage) -> f32 {
     let mut total: u64 = 0;
     let mut count: u64 = 0;
     for (x, y, pixel) in img1.pixels() {
@@ -104,7 +104,7 @@ pub fn image_diff(img1: Arc<DynamicImage>, img2: &RgbaImage) -> u64 {
             ((r_diff * r_diff) as u64 + (g_diff * g_diff) as u64 + (b_diff * b_diff) as u64) as u64;
         count += 1;
     }
-    ((total / count) as f64).sqrt() as u64
+    ((total / count) as f32).sqrt()
 }
 
 fn check_bounds(bounds: &[Point; 2]) {
@@ -113,5 +113,32 @@ fn check_bounds(bounds: &[Point; 2]) {
     }
     if (bounds[1].y - bounds[0].y) < 1.0 {
         error!("image_utils: boundaries must be at least than one!");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    fn get_test_image() -> DynamicImage {
+        let root_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let img_path = root_dir.join(Path::new("lena_std.tif"));
+        load_image(&img_path).unwrap()
+    }
+
+    #[test]
+    fn test_image_diff() {
+        let i = Arc::new(get_test_image());
+        let score = image_diff(i.clone(), &i.to_rgba());
+        assert_eq!(0.0, score);
+    }
+
+    #[test]
+    fn test_image_area_diff() {
+        let i = Arc::new(get_test_image());
+        let bounds = &[Point{x: 0.0,y: 0.0}, Point{x: 10.0, y: 10.0}];
+        let score = image_area_diff(i.clone(), &i.to_rgba(), bounds);
+        assert_eq!(0.0, score);
     }
 }

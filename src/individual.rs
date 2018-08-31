@@ -24,7 +24,7 @@ pub struct GImage {
 
 pub trait Individual {
     fn mutate(&self, shape: Polygon, new_id: u32) -> GImage;
-    fn fitness_full(&self) -> u64;
+    fn fitness_full(&self) -> f32;
     fn fitness_mutation(&self) -> f32;
 }
 
@@ -153,7 +153,7 @@ impl Individual for GImage {
 
     fn fitness_mutation(&self) -> f32 {
         match self.raster() {
-            Ok(r) => image_area_diff(self.target.clone(), &r, self.mutation_area()),
+            Ok(r) => image_area_diff(self.target.clone(), &r, &self.mutation_area()),
             Err(e) => {
                 error!("error rasterizing individual {}: {}", self.id, e);
                 9999.0
@@ -161,7 +161,7 @@ impl Individual for GImage {
         }
     }
 
-    fn fitness_full(&self) -> u64 {
+    fn fitness_full(&self) -> f32 {
         image_diff(self.target.clone(), &self.as_rgba_img().unwrap())
     }
 }

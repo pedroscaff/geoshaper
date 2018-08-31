@@ -94,7 +94,7 @@ pub fn run(target: Arc<DynamicImage>, options: Options) -> Result<()> {
         let mutation_area_current_fitness = image_area_diff(
             target.clone(),
             &result_gene.as_rgba_img()?,
-            winner_gene.mutation_area(),
+            &winner_gene.mutation_area(),
         );
 
         // no need to be mutex anymore
