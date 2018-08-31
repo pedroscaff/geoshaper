@@ -1,10 +1,15 @@
 extern crate geoshaper;
 
+extern crate env_logger;
+
 use std::fs::remove_file;
 use std::path::Path;
 
 #[test]
+#[ignore]
 fn smoke() {
+    env_logger::init();
+
     let root_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let img_path = root_dir.join(Path::new("lena_std.tif"));
     let result_path = root_dir.join(Path::new("result.png"));

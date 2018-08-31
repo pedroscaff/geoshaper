@@ -8,12 +8,10 @@ version = "0.1.0"
 
 [dependencies]
 clap = "2.28.0"
-#darwin-rs = "0.4.0"
-rsgenetic = "^1.7.0"
 env_logger = "0.5.10"
 failure = "0.1.1"
 image = "0.19.0"
 log = "0.4.1"
 nsvg = "0.5.0"
 rand = "0.4.2"
-scoped_threadpool = "0.1.*"
+scoped_threadpool = "0.1.9"
